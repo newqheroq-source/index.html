@@ -1,0 +1,55 @@
+/**
+ * 1. 部署前準備：
+ * - 確保您的 Google 試算表第一列（表頭）如下：
+ * 時間戳記 | 姓名 | 單位 | 取餐時間 | 滷肉飯 | 乾麵 | 貢丸湯
+ * * 2. 部署方式：
+ * - 點擊右上角「部署」 > 「新部署」
+ * - 選擇「網頁應用程式」
+ * - 「誰有權限存取」請選擇「所有人」
+ */
+
+function doGet() {
+  // 載入 index.html 檔案
+  return HtmlService.createHtmlOutputFromFile('index')
+    .setTitle('台大食堂 - 線上點餐系統')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+/**
+ * 接收前端表單傳回的資料
+ * @param {Object} data 前端傳入的 JSON 物件
+ */
+function processForm(data) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheets()[0]; // 取得第一個工作表
+    
+    // 如果工作表完全空白，則建立表頭
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["時間戳記", "姓名", "單位", "希望取餐時間", "滷肉飯", "乾麵", "貢丸湯"]);
+    }
+    
+    // 將資料對應到欄位
+    // 這裡的 key 值 (如 data.name) 必須與 index.html 中的 input name 屬性一致
+    const row = [
+      new Date(),                // A: 時間戳記
+      data.name,                 // B: 姓名
+      data.department,           // C: 單位
+      data.pickupTime,           // D: 取餐時間
+      data.braised_pork_rice,    // E: 滷肉飯數量
+      data.dry_noodles,          // F: 乾麵數量
+      data.meatball_soup         // G: 貢丸湯數量
+    ];
+    
+    // 寫入試算表最後一列
+    sheet.appendRow(row);
+    
+    return { status: "success", message: "訂單已成功寫入" };
+    
+  } catch (error) {
+    // 錯誤處理
+    console.error("寫入失敗: " + error.toString());
+    return { status: "error", message: error.toString() };
+  }
+}
