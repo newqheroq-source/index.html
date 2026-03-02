@@ -106,7 +106,7 @@
                 <div id="successIcon" class="hidden text-5xl mb-4 text-green-500">✓</div>
                 <h3 id="statusText" class="text-xl font-bold text-gray-800">訂單處理中...</h3>
                 <p id="subText" class="text-gray-500 mt-2">請稍候片刻</p>
-                <button id="closeBtn" onclick="hideOverlay()" class="hidden mt-6 w-full bg-gray-100 py-2 rounded-xl text-gray-600 font-medium">關閉並重新填寫</button>
+                <button id="closeBtn" onclick="hideOverlay()" class="hidden mt-6 w-full bg-gray-100 py-2 rounded-xl text-gray-600 font-medium border border-gray-200">關閉並重新填寫</button>
             </div>
         </div>
     </div>
@@ -120,8 +120,8 @@
         const subText = document.getElementById('subText');
         const closeBtn = document.getElementById('closeBtn');
 
-        // 更新後的 GAS URL
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbx5W5ps9mUvY1xWrEmlXlST8GYLcQ0dGhnwaaUd7i0JoDahNUwN3JnyzAqTcnhIuQIe/exec";
+        // 使用更新後的 GAS URL (結尾 Qy2Z1)
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzsu4jMXpniVAM6mhVT0gE9JgBG7_5uEmA8b8bHcK0gCqXsJ6YzLbv8I9rQlI6Qy2Z1/exec";
 
         function hideOverlay() {
             overlay.classList.add('hidden');
@@ -144,15 +144,15 @@
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             
-            // 格式化數值
+            // 格式化餐點數量為數值
             data.braised_pork_rice = parseInt(data.braised_pork_rice) || 0;
             data.dry_noodles = parseInt(data.dry_noodles) || 0;
             data.meatball_soup = parseInt(data.meatball_soup) || 0;
 
-            // 傳送資料
+            // 傳送資料至 GAS
             fetch(GAS_URL, {
                 method: 'POST',
-                mode: 'no-cors', // 由於 GAS 重新導向機制，需使用 no-cors
+                mode: 'no-cors', // 處理 Google Apps Script 重新導向與 CORS 政策
                 cache: 'no-cache',
                 body: JSON.stringify(data),
                 headers: {
@@ -160,7 +160,7 @@
                 }
             })
             .then(() => {
-                // 成功狀態
+                // 成功狀態顯示
                 spinner.classList.add('hidden');
                 successIcon.classList.remove('hidden');
                 statusText.innerText = "訂購成功！";
@@ -168,10 +168,12 @@
                 closeBtn.classList.remove('hidden');
             })
             .catch(error => {
+                // 錯誤處理
                 spinner.classList.add('hidden');
                 statusText.innerText = "提交失敗";
                 subText.innerText = "發生錯誤，請確認網路連線或稍後再試。";
                 closeBtn.classList.remove('hidden');
+                console.error('Submission error:', error);
             });
         });
     </script>
